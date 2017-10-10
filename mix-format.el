@@ -44,24 +44,25 @@
 (defun mix-format ()
   (interactive)
   (let* (
-         (out-file (generate-new-buffer "mix-format"))
-         )
+         (out-file (generate-new-buffer "mix-format")))
 
-    (unwind-protect
-        (let* ((command "mix")
-               (filename (buffer-file-name))
-               (retcode (with-temp-buffer
-                          (call-process command
-                                        nil
-                                        out-file
-                                        nil
-                                        "format"
-                                        "--print"
-                                        filename
-                                        ))))
+    (let* ((command "mix")
+           (filename (buffer-file-name))
+           (retcode (with-temp-buffer
+                      (call-process command
+                                    nil
+                                    out-file
+                                    nil
+                                    "format"
+                                    "--print"
+                                    filename
+                                    ))))
+
+      (if (eq retcode 0)
           (progn
             (erase-buffer)
             (insert-buffer out-file)
             (message "mix format applied"))
-          )))
-  )
+        ))))
+
+(provide 'mix-format)
