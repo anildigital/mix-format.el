@@ -55,8 +55,7 @@
                                     nil
                                     "format"
                                     "--print"
-                                    filename
-                                    ))))
+                                    filename))))
       (when (zerop retcode )
         (with-current-buffer
             (let ((p (point)))
@@ -64,7 +63,6 @@
               (insert-buffer-substring out-file)
               (goto-char p)
               (kill-buffer out-file)
-              (message "mix format applied"))
-          )))))
+              (message "mix format applied")))))))
 
 (provide 'mix-format)
