@@ -63,6 +63,7 @@
             (erase-buffer)
             (insert-buffer-substring out-file)
             (goto-char p)
+            (kill-buffer out-file)
             (message "mix format applied"))
           )))))
 
