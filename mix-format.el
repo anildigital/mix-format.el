@@ -58,13 +58,13 @@
                                     filename
                                     ))))
       (when (zerop retcode )
-        (let ((p (point)))
-          (save-excursion
-            (erase-buffer)
-            (insert-buffer-substring out-file)
-            (goto-char p)
-            (kill-buffer out-file)
-            (message "mix format applied"))
+        (with-current-buffer
+            (let ((p (point)))
+              (erase-buffer)
+              (insert-buffer-substring out-file)
+              (goto-char p)
+              (kill-buffer out-file)
+              (message "mix format applied"))
           )))))
 
 (provide 'mix-format)
