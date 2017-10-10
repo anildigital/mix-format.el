@@ -57,12 +57,13 @@
                                     "--print"
                                     filename
                                     ))))
-
-      (if (eq retcode 0)
-          (progn
+      (when (zerop retcode )
+        (let ((p (point)))
+          (save-excursion
             (erase-buffer)
-            (insert-buffer out-file)
+            (insert-buffer-substring out-file)
+            (goto-char p)
             (message "mix format applied"))
-        ))))
+          )))))
 
 (provide 'mix-format)
