@@ -1,6 +1,9 @@
 # mix-format
 Emacs plugin to format your Elixir code.
 
+
+![](https://i.imgur.com/OV5YQBx.gif)
+
 ### Usage
 
 ``` elisp
