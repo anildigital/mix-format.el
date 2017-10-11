@@ -18,3 +18,11 @@ M-x mix-format
 (add-hook 'after-save-hook
           (lambda () (when (eq major-mode 'elixir-mode) (mix-format))))
 ```
+
+
+### Contribute
+Feel free to contribute
+
+
+### Author
+(anil@anilwadghule.com) ; anil wadghule
