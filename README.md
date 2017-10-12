@@ -1,5 +1,5 @@
 # mix-format
-Emacs plugin to format your Elixir code.
+Emacs package to format your Elixir code.
 
 
 ![](https://i.imgur.com/OV5YQBx.gif)
@@ -18,7 +18,7 @@ M-x mix-format
 
 ``` elisp
 ;; elixir-mode hook
-(add-hook 'after-save-hook
+(add-hook 'before-save-hook
           (lambda () (when (eq major-mode 'elixir-mode) (mix-format))))
 ```
 
