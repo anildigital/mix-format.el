@@ -18,8 +18,9 @@ M-x mix-format
 
 ``` elisp
 ;; elixir-mode hook
-(add-hook 'before-save-hook
-          (lambda () (when (eq major-mode 'elixir-mode) (mix-format))))
+(add-hook 'elixir-mode-hook
+          (lambda () (add-hook 'before-save-hook 'mix-format)))
+
 ```
 
 
