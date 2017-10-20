@@ -45,44 +45,43 @@
   (unwind-protect
       (let* (
              (in-file (make-temp-file "mix-format"))
-             (out-file (make-temp-file "mix-format"))
              (err-file (make-temp-file "mix-format"))
              (contents (buffer-substring-no-properties (point-min) (point-max)))
              (_ (with-temp-file in-file (insert contents))))
-
 
         (let* ((command mixfmt-elixir)
                (error-buffer (get-buffer-create "*mix-format errors*"))
                (retcode (with-temp-buffer
                           (call-process command
-                                        nil (list out-file err-file)
+                                        nil (list nil err-file)
                                         nil
                                         mixfmt-mix
                                         "format"
-                                        "--print"
                                         in-file))))
 
-          (with-current-buffer error-buffer
-            (read-only-mode 0)
-            (insert-file-contents err-file nil nil nil t)
-            (ansi-color-apply-on-region (point-min) (point-max))
-            (special-mode))
-
-          (if (zerop retcode )
+          (if (zerop retcode)
               (let ((p (point)))
                 (save-excursion
                   (erase-buffer)
-                  (insert-buffer-substring out-file)
+                  (insert-file-contents in-file)
                   (message "mix format applied"))
-                (goto-char p))
+                (goto-char p)
+                (kill-buffer error-buffer))
 
-            (if is-interactive
-                (display-buffer error-buffer)
-              (message "mix-format failed: see %s" (buffer-name error-buffer)))
+            (progn
+              (with-current-buffer error-buffer
+                (read-only-mode 0)
+                (insert-file-contents err-file nil nil nil t)
+                (ansi-color-apply-on-region (point-min) (point-max))
+                (special-mode))
+
+              (if is-interactive
+                  (display-buffer error-buffer)
+                (message "mix-format failed: see %s" (buffer-name error-buffer))))
             ))
+
         (delete-file in-file)
-        (delete-file err-file)
-        (delete-file out-file))))
+        (delete-file err-file))))
 
 (provide 'mix-format)
 
