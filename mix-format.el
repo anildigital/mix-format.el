@@ -28,6 +28,16 @@
 ;; M-x mix-format
 ;;
 
+(defcustom mixfmt-elixir "elixir"
+  "Path to the Elixir interpreter."
+  :type 'string
+  :group 'mix-format)
+
+(defcustom mixfmt-mix "/usr/bin/mix"
+  "Path to the 'mix' executable."
+  :type 'string
+  :group 'mix-format)
+
 ;;; Code
 (defun mix-format (&optional is-interactive)
   (interactive "p")
@@ -41,12 +51,13 @@
              (_ (with-temp-file in-file (insert contents))))
 
 
-        (let* ((command "mix")
+        (let* ((command mixfmt-elixir)
                (error-buffer (get-buffer-create "*mix-format errors*"))
                (retcode (with-temp-buffer
                           (call-process command
                                         nil (list out-file err-file)
                                         nil
+                                        mixfmt-mix
                                         "format"
                                         "--print"
                                         in-file))))
