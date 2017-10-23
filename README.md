@@ -24,7 +24,7 @@ $ which mix
 ```
 
 
-#### Usage
+### Usage
 ``` elisp
 ;; require from Emacs
 (require 'mix-format)
