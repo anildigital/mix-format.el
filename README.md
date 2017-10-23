@@ -11,6 +11,8 @@ Customize the mix binary path
 In Emacs, run following command to customize option
 ``` elisp
 M-x customize-option
+
+Customize-variable: mixfmt-mix
 ```
 and set your mix executable path there.
 
