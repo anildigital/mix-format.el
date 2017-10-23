@@ -4,8 +4,25 @@ Emacs package to format your Elixir code.
 
 ![](https://i.imgur.com/OV5YQBx.gif)
 
-### Usage
 
+### Setup
+Customize the mix binary path
+
+In Emacs, run following command to customize option
+``` elisp
+M-x customize-option
+```
+and set your mix executable path there.
+
+Your machine's mix executable path can be found with `which` command as shown below
+
+``` shell
+$ which mix
+/usr/local/bin/mix
+```
+
+
+#### Usage
 ``` elisp
 ;; require from Emacs
 (require 'mix-format)
