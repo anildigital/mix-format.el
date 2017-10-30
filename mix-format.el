@@ -55,7 +55,7 @@ you save any file, kind of defeating the point of autoloading."
 
   (unwind-protect
       (let* ((p (point))
-             (errbuff (get-buffer-create "mix-format-errors"))
+             (errbuff (get-buffer-create "*mix-format-errors*"))
              (retcode (call-process-region (point-min) (point-max)
                                            mixfmt-elixir
                                            nil
@@ -75,7 +75,7 @@ you save any file, kind of defeating the point of autoloading."
 
               (message "mix format applied")
               (goto-char p)
-              (kill-buffer "mix-format-errors"))
+              (kill-buffer "*mix-format-errors*"))
 
           (let ((error-buffer (get-buffer "mix-format-errors")))
             (with-current-buffer error-buffer
@@ -84,8 +84,8 @@ you save any file, kind of defeating the point of autoloading."
               (special-mode))
 
             (if is-interactive
-                (display-buffer error-buffer)
-              (message "mix-format failed: see %s" (buffer-name error-buffer)))))
+                (display-buffer errbuff)
+              (message "mix-format failed: see %s" (buffer-name errbuff)))))
         )))
 
 (provide 'mix-format)
