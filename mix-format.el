@@ -54,8 +54,7 @@ you save any file, kind of defeating the point of autoloading."
   (interactive "p")
 
   (unwind-protect
-      (let* ((contents (buffer-substring-no-properties (point-min) (point-max)))
-             (p (point))
+      (let* ((p (point))
              (errbuff (get-buffer-create "mix-format-errors"))
              (retcode (call-process-region (point-min) (point-max)
                                            mixfmt-elixir
