@@ -54,45 +54,40 @@ you save any file, kind of defeating the point of autoloading."
   (interactive "p")
 
   (unwind-protect
-      (let* (
-             (in-file (make-temp-file "mix-format"))
-             (err-file (make-temp-file "mix-format"))
-             (contents (buffer-substring-no-properties (point-min) (point-max)))
-             (_ (with-temp-file in-file (insert contents))))
+      (let* ((contents (buffer-substring-no-properties (point-min) (point-max)))
+             (p (point))
+             (errbuff (get-buffer-create "mix-format-errors"))
+             (retcode (call-process-region (point-min) (point-max)
+                                           mixfmt-elixir
+                                           nil
+                                           errbuff
+                                           t
+                                           mixfmt-mix "format" "-"))
+             (output nil))
 
-        (let* ((command mixfmt-elixir)
-               (error-buffer (get-buffer-create "*mix-format errors*"))
-               (retcode (with-temp-buffer
-                          (call-process command
-                                        nil (list nil err-file)
-                                        nil
-                                        mixfmt-mix
-                                        "format"
-                                        in-file))))
-
-          (if (zerop retcode)
-              (let ((p (point)))
-                (save-excursion
-                  (erase-buffer)
-                  (insert-file-contents in-file)
-                  (message "mix format applied"))
-                (goto-char p)
-                (kill-buffer error-buffer))
-
+        (if (zerop retcode)
             (progn
-              (with-current-buffer error-buffer
-                (read-only-mode 0)
-                (insert-file-contents err-file nil nil nil t)
-                (ansi-color-apply-on-region (point-min) (point-max))
-                (special-mode))
+              (with-current-buffer errbuff
+                (setq output (buffer-substring-no-properties (point-min) (point-max))))
 
-              (if is-interactive
-                  (display-buffer error-buffer)
-                (message "mix-format failed: see %s" (buffer-name error-buffer))))
-            ))
+              (save-excursion
+                (erase-buffer)
+                (insert-string output))
 
-        (delete-file in-file)
-        (delete-file err-file))))
+              (message "mix format applied")
+              (goto-char p)
+              (kill-buffer "mix-format-errors"))
+
+          (let ((error-buffer (get-buffer "mix-format-errors")))
+            (with-current-buffer error-buffer
+              (read-only-mode 0)
+              (ansi-color-apply-on-region (point-min) (point-max))
+              (special-mode))
+
+            (if is-interactive
+                (display-buffer error-buffer)
+              (message "mix-format failed: see %s" (buffer-name error-buffer)))))
+        )))
 
 (provide 'mix-format)
 

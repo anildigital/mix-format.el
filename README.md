@@ -6,9 +6,15 @@ Emacs package to format your Elixir code.
 
 
 ### Setup
-Customize the mix binary path
+Customize the elixir and mix pathes
 
 In Emacs, run following command to customize option
+``` elisp
+M-x customize-option
+
+Customize-variable: mixfmt-elixir
+```
+and set your elixir executable path there. After that run:
 ``` elisp
 M-x customize-option
 
@@ -16,7 +22,7 @@ Customize-variable: mixfmt-mix
 ```
 and set your mix executable path there.
 
-Your machine's mix executable path can be found with `which` command as shown below
+Your machine's elixir and mix executable paths can be found with `which` command as shown below
 
 ``` shell
 $ which mix
