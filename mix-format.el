@@ -77,9 +77,9 @@ you save any file, kind of defeating the point of autoloading."
               (goto-char p)
               (kill-buffer "*mix-format-errors*"))
 
-          (let ((error-buffer (get-buffer "mix-format-errors")))
-            (with-current-buffer error-buffer
-              (read-only-mode 0)
+          (progn
+            (with-current-buffer errbuff
+              (setq buffer-read-only t)
               (ansi-color-apply-on-region (point-min) (point-max))
               (special-mode))
 
