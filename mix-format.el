@@ -53,6 +53,9 @@ you save any file, kind of defeating the point of autoloading."
 (defun mix-format (&optional is-interactive)
   (interactive "p")
 
+  (when (get-buffer "*mix-format-errors*")
+    (kill-buffer "*mix-format-errors*"))
+
   (unwind-protect
       (let* ((p (point))
              (errbuff (get-buffer-create "*mix-format-errors*"))
