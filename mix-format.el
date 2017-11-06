@@ -53,42 +53,49 @@ you save any file, kind of defeating the point of autoloading."
 (defun mix-format (&optional is-interactive)
   (interactive "p")
 
-  (when (get-buffer "*mix-format-errors*")
-    (kill-buffer "*mix-format-errors*"))
+  (when (get-buffer "*mix-format-output*")
+    (kill-buffer "*mix-format-output*"))
 
   (unwind-protect
       (let* ((p (point))
-             (errbuff (get-buffer-create "*mix-format-errors*"))
+             (outbuff (get-buffer-create "*mix-format-output*"))
+             (errfile (make-temp-file "mix-format"))
              (retcode (call-process-region (point-min) (point-max)
                                            mixfmt-elixir
                                            nil
-                                           errbuff
+                                           (list outbuff errfile)
                                            t
                                            mixfmt-mix "format" "-"))
              (output nil))
 
         (if (zerop retcode)
             (progn
-              (with-current-buffer errbuff
+              (with-current-buffer outbuff
                 (setq output (buffer-substring-no-properties (point-min) (point-max))))
 
               (save-excursion
                 (erase-buffer)
                 (insert-string output))
 
+              (when (get-buffer "*mix-format-errors*")
+                (kill-buffer "*mix-format-errors*"))
+
               (message "mix format applied")
-              (goto-char p)
-              (kill-buffer "*mix-format-errors*"))
+              (goto-char p))
 
           (progn
-            (with-current-buffer errbuff
+            (with-current-buffer (get-buffer-create "*mix-format-errors*")
+              (insert-file-contents errfile nil nil nil t)
               (setq buffer-read-only t)
               (ansi-color-apply-on-region (point-min) (point-max))
               (special-mode))
 
             (if is-interactive
-                (display-buffer errbuff)
-              (message "mix-format failed: see %s" (buffer-name errbuff)))))
+                (display-buffer outbuff)
+              (message "mix-format failed: see %s" (buffer-name outbuff)))))
+
+        (delete-file errfile)
+        (kill-buffer "*mix-format-output*")
         )))
 
 (provide 'mix-format)
