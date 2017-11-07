@@ -38,6 +38,17 @@
   :type 'string
   :group 'mix-format)
 
+(defcustom mixfmt-args nil
+  "Additional arguments to 'mix format'"
+  :type '(repeat string)
+  :group 'mix-format)
+
+(defcustom mix-format-hook nil
+  "Hook called by `mix-format'."
+  :type 'hook
+  :group 'mix-format)
+
+
 ;;; Code
 (defun mix-format-before-save ()
   "Add this to .emacs to run mix format on the current buffer when saving:
@@ -60,13 +71,22 @@ you save any file, kind of defeating the point of autoloading."
       (let* ((p (point))
              (outbuff (get-buffer-create "*mix-format-output*"))
              (errfile (make-temp-file "mix-format"))
-             (retcode (call-process-region (point-min) (point-max)
-                                           mixfmt-elixir
-                                           nil
-                                           (list outbuff errfile)
-                                           t
-                                           mixfmt-mix "format" "-"))
+             (our-mixfmt-args (list mixfmt-mix "format"))
+             (retcode nil)
              (output nil))
+
+        (run-hooks 'mix-format-hook)
+
+        (when mixfmt-args
+          (setq our-mixfmt-args (append our-mixfmt-args mixfmt-args)))
+        (setq our-mixfmt-args (append our-mixfmt-args (list "-")))
+
+        (setq retcode (apply #'call-process-region (point-min) (point-max)
+                             mixfmt-elixir
+                             nil
+                             (list outbuff errfile)
+                             t
+                             our-mixfmt-args))
 
         (if (zerop retcode)
             (progn

@@ -48,6 +48,22 @@ M-x mix-format
 
 ```
 
+To use a `.formatter.exs` you can either set `mixfmt-args` globally to a path like this:
+
+``` elisp
+(setq mixfmt-args (list "--dot-formatter" "/path/to/.formatter.exs"))
+```
+
+or you set `mixfmt-args` in a hook like this:
+
+```elisp
+(add-hook 'mix-format-hook '(lambda ()
+                              (if (projectile-project-p)
+                                  (setq mixfmt-args (list "--dot-formatter" (concat (projectile-project-root) "/.formatter.exs")))
+                                (setq mixfmt-args nil))))
+```
+
+In this example we use [Projectile](https://github.com/bbatsov/projectile) to get the project root and set `mixfmt-args` accordingly.
 
 ### Contribute
 Feel free to contribute
