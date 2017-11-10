@@ -61,62 +61,130 @@ you save any file, kind of defeating the point of autoloading."
   (when (eq major-mode 'elixir-mode) (mix-format)))
 
 
+(defun mixfmt--goto-line (line)
+  (goto-char (point-min))
+  (forward-line (1- line)))
+
+(defun mixfmt--delete-whole-line (&optional arg)
+  "Delete the current line without putting it in the `kill-ring'.
+Derived from function `kill-whole-line'.  ARG is defined as for that
+function.
+
+Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
+  (setq arg (or arg 1))
+  (if (and (> arg 0)
+           (eobp)
+           (save-excursion (forward-visible-line 0) (eobp)))
+      (signal 'end-of-buffer nil))
+  (if (and (< arg 0)
+           (bobp)
+           (save-excursion (end-of-visible-line) (bobp)))
+      (signal 'beginning-of-buffer nil))
+  (cond ((zerop arg)
+         (delete-region (progn (forward-visible-line 0) (point))
+                        (progn (end-of-visible-line) (point))))
+        ((< arg 0)
+         (delete-region (progn (end-of-visible-line) (point))
+                        (progn (forward-visible-line (1+ arg))
+                               (unless (bobp)
+                                 (backward-char))
+                               (point))))
+        (t
+         (delete-region (progn (forward-visible-line 0) (point))
+                        (progn (forward-visible-line arg) (point))))))
+
+(defun mixfmt--apply-rcs-patch (patch-buffer)
+  "Apply an RCS-formatted diff from PATCH-BUFFER to the current buffer.
+Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
+
+  (let ((target-buffer (current-buffer))
+        ;; Relative offset between buffer line numbers and line numbers
+        ;; in patch.
+        ;;
+        ;; Line numbers in the patch are based on the source file, so
+        ;; we have to keep an offset when making changes to the
+        ;; buffer.
+        ;;
+        ;; Appending lines decrements the offset (possibly making it
+        ;; negative), deleting lines increments it. This order
+        ;; simplifies the forward-line invocations.
+        (line-offset 0))
+    (save-excursion
+      (with-current-buffer patch-buffer
+        (goto-char (point-min))
+        (while (not (eobp))
+          (unless (looking-at "^\\([ad]\\)\\([0-9]+\\) \\([0-9]+\\)")
+            (error "Invalid rcs patch or internal error in mixfmt--apply-rcs-patch"))
+          (forward-line)
+          (let ((action (match-string 1))
+                (from (string-to-number (match-string 2)))
+                (len  (string-to-number (match-string 3))))
+            (cond
+             ((equal action "a")
+              (let ((start (point)))
+                (forward-line len)
+                (let ((text (buffer-substring start (point))))
+                  (with-current-buffer target-buffer
+                    (cl-decf line-offset len)
+                    (goto-char (point-min))
+                    (forward-line (- from len line-offset))
+                    (insert text)))))
+             ((equal action "d")
+              (with-current-buffer target-buffer
+                (mixfmt--goto-line (- from line-offset))
+                (cl-incf line-offset len)
+                (mixfmt--delete-whole-line len)))
+             (t
+              (error "Invalid rcs patch or internal error in mixfmt--apply-rcs-patch"))))))))
+  )
+
 (defun mix-format (&optional is-interactive)
   (interactive "p")
 
-  (when (get-buffer "*mix-format-output*")
-    (kill-buffer "*mix-format-output*"))
+  (let ((outbuff (get-buffer-create "*mix-format-output*"))
+        (errbuff (get-buffer-create "*mix-format-errors*"))
+        (tmpfile (make-temp-file "mix-format" nil ".ex"))
+        (our-mixfmt-args (list mixfmt-mix "format"))
+        (output nil))
 
-  (unwind-protect
-      (let* ((p (point))
-             (outbuff (get-buffer-create "*mix-format-output*"))
-             (errfile (make-temp-file "mix-format"))
-             (our-mixfmt-args (list mixfmt-mix "format"))
-             (retcode nil)
-             (output nil))
+    (unwind-protect
+        (save-restriction
+          (with-current-buffer outbuff
+            (erase-buffer))
 
-        (run-hooks 'mix-format-hook)
+          (with-current-buffer errbuff
+            (setq buffer-read-only nil)
+            (erase-buffer))
 
-        (when mixfmt-args
-          (setq our-mixfmt-args (append our-mixfmt-args mixfmt-args)))
-        (setq our-mixfmt-args (append our-mixfmt-args (list "-")))
+          (write-region nil nil tmpfile)
 
-        (setq retcode (apply #'call-process-region (point-min) (point-max)
-                             mixfmt-elixir
-                             nil
-                             (list outbuff errfile)
-                             t
-                             our-mixfmt-args))
+          (run-hooks 'mix-format-hook)
 
-        (if (zerop retcode)
+          (when mixfmt-args
+            (setq our-mixfmt-args (append our-mixfmt-args mixfmt-args)))
+          (setq our-mixfmt-args (append our-mixfmt-args (list tmpfile)))
+
+          (if (zerop (apply #'call-process mixfmt-elixir nil errbuff nil our-mixfmt-args))
+              (progn
+                (if (zerop (call-process-region (point-min) (point-max) "diff" nil outbuff nil "-n" "-" tmpfile))
+                    (message "File is already formatted")
+                  (progn
+                    (mixfmt--apply-rcs-patch outbuff)
+                    (message "mix format applied")))
+                (kill-buffer errbuff))
+
             (progn
-              (with-current-buffer outbuff
-                (setq output (buffer-substring-no-properties (point-min) (point-max))))
+              (with-current-buffer errbuff
+                (setq buffer-read-only t)
+                (ansi-color-apply-on-region (point-min) (point-max))
+                (special-mode))
 
-              (save-excursion
-                (erase-buffer)
-                (insert-string output))
+              (if is-interactive
+                  (display-buffer errbuff)
+                (message "mix-format failed: see %s" (buffer-name errbuff)))))
 
-              (when (get-buffer "*mix-format-errors*")
-                (kill-buffer "*mix-format-errors*"))
-
-              (message "mix format applied")
-              (goto-char p))
-
-          (progn
-            (with-current-buffer (get-buffer-create "*mix-format-errors*")
-              (insert-file-contents errfile nil nil nil t)
-              (setq buffer-read-only t)
-              (ansi-color-apply-on-region (point-min) (point-max))
-              (special-mode))
-
-            (if is-interactive
-                (display-buffer outbuff)
-              (message "mix-format failed: see %s" (buffer-name outbuff)))))
-
-        (delete-file errfile)
-        (kill-buffer "*mix-format-output*")
-        )))
+          (delete-file tmpfile)
+          (kill-buffer outbuff)))))
 
 (provide 'mix-format)
 
