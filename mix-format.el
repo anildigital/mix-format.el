@@ -50,6 +50,8 @@
 
 
 ;;; Code
+
+;;;###autoload
 (defun mix-format-before-save ()
   "Add this to .emacs to run mix format on the current buffer when saving:
 \(add-hook 'before-save-hook 'mix-format-before-save).
@@ -138,6 +140,7 @@ Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
               (error "Invalid rcs patch or internal error in mixfmt--apply-rcs-patch"))))))))
   )
 
+;;;###autoload
 (defun mix-format (&optional is-interactive)
   (interactive "p")
 
