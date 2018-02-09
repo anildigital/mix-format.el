@@ -1,4 +1,5 @@
 ;;; mix-format.el --- Emacs plugin to mix format Elixir files
+;; Version: 0.1.0
 
 ;; Copyright (C) 2017 Anil Wadghule
 
