@@ -1,10 +1,10 @@
-;;; mix-format.el --- Emacs plugin to mix format Elixir files
+;;; elixir-format.el --- Emacs plugin to mix format Elixir files
 ;; Version: 0.1.0
 
 ;; Copyright (C) 2017 Anil Wadghule
 
 ;; Author: Anil Wadghule <anildigital@gmail.com>
-;; URL: https://github.com/anildigital/mix-format
+;; URL: https://github.com/anildigital/elixir-format
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -20,55 +20,55 @@
 
 ;;; Commentary:
 
-;; The mix-format function formats the elixir files with Elixir's `mix format`
+;; The elixir-format function formats the elixir files with Elixir's `mix format`
 ;; command
 
 ;; e.g.
 ;;
-;; (require 'mix-format)
-;; M-x mix-format
+;; (require 'elixir-format)
+;; M-x elixir-format
 ;;
 
-(defcustom mixfmt-elixir "elixir"
+(defcustom elixir-format-elixir-path "elixir"
   "Path to the Elixir interpreter."
   :type 'string
-  :group 'mix-format)
+  :group 'elixir-format)
 
-(defcustom mixfmt-mix "/usr/bin/mix"
+(defcustom elixir-format-mix-path "/usr/bin/mix"
   "Path to the 'mix' executable."
   :type 'string
-  :group 'mix-format)
+  :group 'elixir-format)
 
-(defcustom mixfmt-args nil
+(defcustom elixir-format-arguments nil
   "Additional arguments to 'mix format'"
   :type '(repeat string)
-  :group 'mix-format)
+  :group 'elixir-format)
 
-(defcustom mix-format-hook nil
-  "Hook called by `mix-format'."
+(defcustom elixir-format-hook nil
+  "Hook called by `elixir-format'."
   :type 'hook
-  :group 'mix-format)
+  :group 'elixir-format)
 
 
 ;;; Code
 
 ;;;###autoload
-(defun mix-format-before-save ()
+(defun elixir-format-before-save ()
   "Add this to .emacs to run mix format on the current buffer when saving:
-\(add-hook 'before-save-hook 'mix-format-before-save).
+\(add-hook 'before-save-hook 'elixir-format-before-save).
 
 Note that this will cause ‘elixir-mode’ to get loaded the first time
 you save any file, kind of defeating the point of autoloading."
 
   (interactive)
-  (when (eq major-mode 'elixir-mode) (mix-format)))
+  (when (eq major-mode 'elixir-mode) (elixir-format)))
 
 
-(defun mixfmt--goto-line (line)
+(defun elixir-format--goto-line (line)
   (goto-char (point-min))
   (forward-line (1- line)))
 
-(defun mixfmt--delete-whole-line (&optional arg)
+(defun elixir-format--delete-whole-line (&optional arg)
   "Delete the current line without putting it in the `kill-ring'.
 Derived from function `kill-whole-line'.  ARG is defined as for that
 function.
@@ -96,7 +96,7 @@ Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
          (delete-region (progn (forward-visible-line 0) (point))
                         (progn (forward-visible-line arg) (point))))))
 
-(defun mixfmt--apply-rcs-patch (patch-buffer)
+(defun elixir-format--apply-rcs-patch (patch-buffer)
   "Apply an RCS-formatted diff from PATCH-BUFFER to the current buffer.
 Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
 
@@ -117,7 +117,7 @@ Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
         (goto-char (point-min))
         (while (not (eobp))
           (unless (looking-at "^\\([ad]\\)\\([0-9]+\\) \\([0-9]+\\)")
-            (error "Invalid rcs patch or internal error in mixfmt--apply-rcs-patch"))
+            (error "Invalid rcs patch or internal error in elixir-format--apply-rcs-patch"))
           (forward-line)
           (let ((action (match-string 1))
                 (from (string-to-number (match-string 2)))
@@ -134,21 +134,21 @@ Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
                     (insert text)))))
              ((equal action "d")
               (with-current-buffer target-buffer
-                (mixfmt--goto-line (- from line-offset))
+                (elixir-format--goto-line (- from line-offset))
                 (cl-incf line-offset len)
-                (mixfmt--delete-whole-line len)))
+                (elixir-format--delete-whole-line len)))
              (t
-              (error "Invalid rcs patch or internal error in mixfmt--apply-rcs-patch"))))))))
+              (error "Invalid rcs patch or internal error in elixir-format--apply-rcs-patch"))))))))
   )
 
 ;;;###autoload
-(defun mix-format (&optional is-interactive)
+(defun elixir-format (&optional is-interactive)
   (interactive "p")
 
-  (let ((outbuff (get-buffer-create "*mix-format-output*"))
-        (errbuff (get-buffer-create "*mix-format-errors*"))
-        (tmpfile (make-temp-file "mix-format" nil ".ex"))
-        (our-mixfmt-args (list mixfmt-mix "format"))
+  (let ((outbuff (get-buffer-create "*elixir-format-output*"))
+        (errbuff (get-buffer-create "*elixir-format-errors*"))
+        (tmpfile (make-temp-file "elixir-format" nil ".ex"))
+        (our-elixir-format-arguments (list elixir-format-mix-path "format"))
         (output nil))
 
     (unwind-protect
@@ -162,18 +162,18 @@ Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
 
           (write-region nil nil tmpfile)
 
-          (run-hooks 'mix-format-hook)
+          (run-hooks 'elixir-format-hook)
 
-          (when mixfmt-args
-            (setq our-mixfmt-args (append our-mixfmt-args mixfmt-args)))
-          (setq our-mixfmt-args (append our-mixfmt-args (list tmpfile)))
+          (when elixir-format-arguments
+            (setq our-elixir-format-arguments (append our-elixir-format-arguments elixir-format-arguments)))
+          (setq our-elixir-format-arguments (append our-elixir-format-arguments (list tmpfile)))
 
-          (if (zerop (apply #'call-process mixfmt-elixir nil errbuff nil our-mixfmt-args))
+          (if (zerop (apply #'call-process elixir-format-elixir-path nil errbuff nil our-elixir-format-arguments))
               (progn
                 (if (zerop (call-process-region (point-min) (point-max) "diff" nil outbuff nil "-n" "-" tmpfile))
                     (message "File is already formatted")
                   (progn
-                    (mixfmt--apply-rcs-patch outbuff)
+                    (elixir-format--apply-rcs-patch outbuff)
                     (message "mix format applied")))
                 (kill-buffer errbuff))
 
@@ -185,11 +185,11 @@ Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
 
               (if is-interactive
                   (display-buffer errbuff)
-                (message "mix-format failed: see %s" (buffer-name errbuff)))))
+                (message "elixir-format failed: see %s" (buffer-name errbuff)))))
 
           (delete-file tmpfile)
           (kill-buffer outbuff)))))
 
-(provide 'mix-format)
+(provide 'elixir-format)
 
-;;; mix-format.el ends here
+;;; elixir-format.el ends here

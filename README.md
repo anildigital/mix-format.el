@@ -1,4 +1,4 @@
-# mix-format
+# elixir-format
 Emacs package to format your Elixir code.
 
 
@@ -12,13 +12,13 @@ In Emacs, run following command to customize option
 ``` elisp
 M-x customize-option
 
-Customize-variable: mixfmt-elixir
+Customize-variable: elixir-format-elixir-path
 ```
 and set your elixir executable path there. After that run:
 ``` elisp
 M-x customize-option
 
-Customize-variable: mixfmt-mix
+Customize-variable: elixir-format-mix-path
 ```
 and set your mix executable path there.
 
@@ -33,10 +33,10 @@ $ which mix
 ### Usage
 ``` elisp
 ;; require from Emacs
-(require 'mix-format)
+(require elixir-format)
 
 ;; Use it
-M-x mix-format
+M-x elixir-format
 ```
 
 ### Add elixir-mode hook to run mix format on file save
@@ -44,26 +44,26 @@ M-x mix-format
 ``` elisp
 ;; elixir-mode hook
 (add-hook 'elixir-mode-hook
-          (lambda () (add-hook 'before-save-hook 'mix-format-before-save)))
+          (lambda () (add-hook 'before-save-hook elixir-format-before-save)))
 
 ```
 
-To use a `.formatter.exs` you can either set `mixfmt-args` globally to a path like this:
+To use a `.formatter.exs` you can either set `elixir-format-arguments` globally to a path like this:
 
 ``` elisp
-(setq mixfmt-args (list "--dot-formatter" "/path/to/.formatter.exs"))
+(setq elixir-format-arguments (list "--dot-formatter" "/path/to/.formatter.exs"))
 ```
 
-or you set `mixfmt-args` in a hook like this:
+or you set `elixir-format-arguments` in a hook like this:
 
 ```elisp
-(add-hook 'mix-format-hook '(lambda ()
-                              (if (projectile-project-p)
-                                  (setq mixfmt-args (list "--dot-formatter" (concat (projectile-project-root) "/.formatter.exs")))
-                                (setq mixfmt-args nil))))
+(add-hook elixir-format-hook '(lambda ()
+                                 (if (projectile-project-p)
+                                     (setq elixir-format-arguments (list "--dot-formatter" (concat (projectile-project-root) "/.formatter.exs")))
+                                   (setq elixir-format-arguments nil))))
 ```
 
-In this example we use [Projectile](https://github.com/bbatsov/projectile) to get the project root and set `mixfmt-args` accordingly.
+In this example we use [Projectile](https://github.com/bbatsov/projectile) to get the project root and set `elixir-format-arguments` accordingly.
 
 ### Contribute
 Feel free to contribute
