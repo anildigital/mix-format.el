@@ -185,7 +185,7 @@ Shamelessly stolen from go-mode (https://github.com/dominikh/go-mode.el)"
 
               (if is-interactive
                   (display-buffer errbuff)
-                (message "elixir-format failed: see %s" (buffer-name errbuff)))))
+                (error "elixir-format failed: see %s" (buffer-name errbuff)))))
 
           (delete-file tmpfile)
           (kill-buffer outbuff)))))
