@@ -33,7 +33,7 @@ $ which mix
 ### Usage
 ``` elisp
 ;; require from Emacs
-(require elixir-format)
+(require 'elixir-format)
 
 ;; Use it
 M-x elixir-format
@@ -44,7 +44,7 @@ M-x elixir-format
 ``` elisp
 ;; elixir-mode hook
 (add-hook 'elixir-mode-hook
-          (lambda () (add-hook 'before-save-hook elixir-format-before-save)))
+          (lambda () (add-hook 'before-save-hook 'elixir-format-before-save)))
 
 ```
 
