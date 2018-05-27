@@ -1,6 +1,5 @@
 ;;; elixir-format-test.el --- Basic tests for elixir-format
 
-
 ;;; Code:
 
 (ert-deftest indents-a-buffer ()
@@ -21,19 +20,6 @@
 
     (should (equal (buffer-string) elixir-format-formatted-test-example))
     (undo 0)
-    (should (equal (buffer-string) elixir-format-test-example))))
-
-(ert-deftest elixir-format-before-save-formats-buffer ()
-  (ert-with-test-buffer ()
-    (insert elixir-format-test-example)
-    (setq major-mode 'elixir-mode)
-    (elixir-format-before-save)
-    (should (equal (buffer-string) elixir-format-formatted-test-example))))
-
-(ert-deftest elixir-format-before-save-should-not-format-buffer ()
-  (ert-with-test-buffer ()
-    (insert elixir-format-test-example)
-    (elixir-format-before-save)
     (should (equal (buffer-string) elixir-format-test-example))))
 
 (ert-deftest elixir-format-should-run-hook-before-formatting ()

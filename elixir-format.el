@@ -51,19 +51,6 @@
 
 
 ;;; Code
-
-;;;###autoload
-(defun elixir-format-before-save ()
-  "Add this to .emacs to run mix format on the current buffer when saving:
-\(add-hook 'before-save-hook 'elixir-format-before-save).
-
-Note that this will cause ‘elixir-mode’ to get loaded the first time
-you save any file, kind of defeating the point of autoloading."
-
-  (interactive)
-  (when (eq major-mode 'elixir-mode) (elixir-format)))
-
-
 (defun elixir-format--goto-line (line)
   (goto-char (point-min))
   (forward-line (1- line)))

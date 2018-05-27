@@ -22,6 +22,13 @@ Customize-variable: elixir-format-mix-path
 ```
 and set your mix executable path there.
 
+Alternavively you can define variables as below
+
+``` elisp
+(setq elixir-format-elixir-path "/usr/local/bin/elixir")
+(setq elixir-format-mix-path "/usr/local/bin/mix")
+```
+
 Your machine's elixir and mix executable paths can be found with `which` command as shown below
 
 ``` shell
@@ -42,10 +49,9 @@ M-x elixir-format
 ### Add elixir-mode hook to run mix format on file save
 
 ``` elisp
-;; elixir-mode hook
+;; Create a buffer-local hook to run elixir-format on save, only when we enable elixir-mode.
 (add-hook 'elixir-mode-hook
-          (lambda () (add-hook 'before-save-hook 'elixir-format-before-save)))
-
+          (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
 ```
 
 To use a `.formatter.exs` you can either set `elixir-format-arguments` globally to a path like this:
