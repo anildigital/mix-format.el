@@ -1,4 +1,11 @@
-# elixir-format
+# P.S.
+
+The work from this repository has been merged to officially supporrted [elixir-mode](https://github.com/elixir-editors/emacs-elixir). Please update your `elixir-mode` and you should be okay to use `elixir-format`. Do check [README](https://github.com/elixir-editors/emacs-elixir) for more instructions to setup.
+
+
+
+
+# elixir-format (INACTIVE - work merged to https://github.com/elixir-editors/emacs-elixir) 
 Emacs package to format your Elixir code.
 
 
